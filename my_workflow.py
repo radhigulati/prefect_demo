@@ -17,10 +17,19 @@ def show_stars(github_repos: list[str]):
         print(f"{repo}: {stars} stars")
 
 
-@task
-def fetch_stats(github_repo: str):
+@task(log_prints=True)
+def fetch_stats(github_repo: str) -> dict[str, Any]:
     """Task 1: Fetch the statistics for a GitHub repo"""
-    return httpx.get(f"https://api.github.com/repos/{github_repo}").json()
+    rate_limit("github-api")
+    
+    response = httpx.get(f"https://api.github.com/repos/{github_repo}")
+    
+    # Print status code and full response
+    print(f"Status code for {github_repo}: {response.status_code}")
+    print(f"Response for {github_repo}: {response.text[:500]}...")  # Print first 500 chars
+    
+    data = response.json()
+    return data
 
 
 @task
